@@ -1,58 +1,65 @@
-#calculateDistance
+# calculateDistance
 
-#import puzzleSolver
+# import puzzleSolver
 from scipy.spatial.distance import hamming
 from scipy.spatial.distance import cityblock
 
-#endBoard = puzzleSolver.endBoard
 
-def Manhattan(board, endBoard):
+# endBoard = puzzleSolver.endBoard
+
+def manhattan(board, end_board):
     dist = 0
-    for i in range (len(board)):
+    for i in range(len(board)):
         element = board[i]
         if element != 0:
-            shouldBe = endBoard.index(element)
-            distRow = int(shouldBe/3)-int(i/3)
-            distCol = shouldBe%3-i%3
-            dist = dist + abs(distCol)+abs(distRow)
+            should = end_board.index(element)
+            dist_row = int(should / 3) - int(i / 3)
+            dist_col = should % 3 - i % 3
+            dist += abs(dist_col) + abs(dist_row)
     return dist
 
-def Manhattan2(board, endBoard):
-    return cityblock(board, endBoard)
 
-def Hamming(board,endBoard):
+def manhattan2(board, end_board):
+    return cityblock(board, end_board)
+
+
+def hamming(board, end_board):
     dist = 0
-    for i in range (len(board)):
+    for i in range(len(board)):
+        element = board[i]
+        if element:
+            should = end_board.index(element)
+            if i != should:
+                dist += 1
+    return dist
+
+
+def hamming2(board, end_board):
+    return hamming(board, end_board) * len(board)
+
+
+def calculate_distance_simple(board, end_board):
+    dist = 0
+    for i in range(len(board)):
+        dist += abs(end_board[i] - board[i])
+    return dist
+
+
+def calculate_distance_list(board, end_board):
+    dist = 0
+    for i in range(len(board)):
+        element = board[i]
+        dist += abs(end_board.index(element) - i)
+    return dist
+
+
+def astar(board, end_board):
+    dist = 0
+    for i in range(len(board)):
         element = board[i]
         if element != 0:
-            shouldBe = endBoard.index(element)
-            if i != shouldBe:
-                dist = dist +1
-    return dist
-
-def Hamming2(board,endBoard):
-    return hamming(board, endBoard)*len(board)
-
-def calculateDistanceSimple(board,endBoard):
-    dist = 0
-    for i in range (len(board)):
-        dist = dist + abs(endBoard[i]-board[i])
-    return dist
-
-def calculateDistanceList(board,endBoard):
-    dist = 0
-    for i in range (len(board)):
-        element = board[i]
-        dist = dist + abs(endBoard.index(element)-i)
-    return dist
-
-def ASTAR(board,endBoard):
-    dist = 0
-    for i in range (len(board)):
-        element = board[i]
-        if element != 0:
-            shouldBe = endBoard.index(element)
-            distRow = shouldBe/3-i/3
-            distCol = shouldBe%3-i%3
-            dist = dist + int(abs((distCol)+int(distRow))*1.2)
+            should = end_board.index(element)
+            dist_row = should / 3 - i / 3
+            dist_col = should % 3 - i % 3
+            dist += int(abs(dist_col + int(dist_row)) * 1.2)
     return dist
