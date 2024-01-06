@@ -13,7 +13,7 @@ def read_board():
 # startBoard = readBoard()
 
 
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     start = time.time()
     for i in range(100000000):
         pass
@@ -22,4 +22,4 @@ if __name__ == "__main__":
     i=0
     while i <100000000:
         i+=1
-    print("while loop duration", time.time()-start)
+    print("while loop duration", time.time()-start)"""

@@ -22,8 +22,8 @@ def create_random_list(number):
     return board_list
 
 
-if __name__ == "__main__":
-    print(create_random_list(10))
+#if __name__ == "__main__":
+    #print(create_random_list(10))
     """list_hundred = create_random_list(100)
     list_thousand = create_random_list(1000)
     list_ten_thousand = create_random_list(10000)
