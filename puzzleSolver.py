@@ -1,6 +1,10 @@
 import time
 import threading
 import multiprocessing
+from multiprocessing.pool import ThreadPool
+
+import json
+import pickle
 import generateRandomBoards
 import heuristic
 from BoardWrapper import BoardWrapper
@@ -49,15 +53,12 @@ def add_to_pipeline(pipeline_list, board_wrapper, heuristics, list_of_moves):
     dist = board_wrapper.distance
     if pipeline_list:  # if list not empty
         for i in range(len(pipeline_list)):  # enter neighbours into pipelinelist, ordered after cost
-            try:
-                if pipeline_list[i].distance > dist:
-                    for j in range(i, len(pipeline_list)):
-                        """if pipeline_list[j].board is board: #Todo: mabey chack steps
-                            pipeline_list.pop(j)"""
-                    pipeline_list.insert(i, board_wrapper)
-                    return pipeline_list
-            except:
-                print(i, len(pipeline_list), heuristics.__name__)
+            if pipeline_list[i].distance > dist:
+                """for j in range(i, len(pipeline_list)):
+                    if pipeline_list[j].board is board: #Todo: mabey chack steps
+                        pipeline_list.pop(j)"""
+                pipeline_list.insert(i, board_wrapper)
+                return pipeline_list
     pipeline_list.append(board_wrapper)
     return pipeline_list
 
@@ -90,8 +91,8 @@ def search_step(pipeline_list, heuristics, list_of_moves):
     return board_wrapper
 
 
-def slide(start_board_wrapper, current_heuristic,
-          pipeline_list):  # finally the searching method: start is the the board to be checked with certain
+def slide(start_board_wrapper, current_heuristic, pipeline_list,
+          index):  # finally the searching method: start is the the board to be checked with certain
     # heuristic
     list_of_moves = []
     add_to_pipeline(pipeline_list, start_board_wrapper, current_heuristic,
@@ -101,6 +102,7 @@ def slide(start_board_wrapper, current_heuristic,
     for counter in range(182000):
         if list_of_moves[-1] == end_board:
             # print("found after ", len(list_of_moves) - 1, "moves")
+            results[index].append((current_board_wrapper, len(list_of_moves)))
             return current_board_wrapper, len(list_of_moves)
         current_board_wrapper = search_step(pipeline_list, current_heuristic,
                                             list_of_moves)  # repeat introducing boards into pipeline
@@ -112,25 +114,27 @@ def run_puzzle_solver(board_wrapper_list, current_heuristic, index):
     # run the solving algorithm for a whole list of board while cheing the time for fining solution. check for
     # solvability first. return number of unsolvable puzzles in list, number of solvable puzzles and time for
     # finding solution
-    pipelineList = []
+    pool = ThreadPool(processes=100)
+    pipeline_list = []
     starting_time = time.time()
     num_of_unsolvable = 0
     for board_wrapper_index in range(len(board_wrapper_list)):
         # print(end=str(board_wrapper_index) + " ")
         start_board_wrapper = board_wrapper_list[board_wrapper_index]
+        # print(check_solvable(start_board_wrapper))
         if check_solvable(start_board_wrapper):
-            solved_board_wrapper = slide(start_board_wrapper, current_heuristic, pipelineList)
-            # trace(listOfMoves)
-            results[index].append(solved_board_wrapper)
-
-
+            pool.apply_async(slide, (start_board_wrapper, current_heuristic, pipeline_list, index))
+            print(board_wrapper_index)
         else:
             # print("unsolvable")
             num_of_unsolvable += 1
-            results[index].append(("unsolvable", 0))
-    results[index].append([None, num_of_unsolvable, (time.time() - starting_time)])
+            # results[index].append(("unsolvable", 0))
+    #pool.close()
+    #pool.join()
+    results[index].append([None, num_of_unsolvable, (time.time() - starting_time), current_heuristic.__name__])
     print("done", (time.time() - starting_time), current_heuristic.__name__, num_of_unsolvable)
-    print(results[index][0][0].previous_board.board)
+    print(results)
+    # print(results[index][0][0].previous_board.board)
     # print(num_of_unsolvable, "unsolvable puzzles found")
     # print(current_heuristic.__name__, "solution for the other", 100 - num_of_unsolvable, "puzzles found in",
     # (time.time() - starting_time), "seconds")
@@ -173,7 +177,13 @@ if __name__ == '__main__':
     # print("boards were generated in ", (time.time() - start_time), " seconds")
     # for k in range(len(boards100)):
     # print(k + 1, " ", boards100[k])
-
+    unsolv = 0
+    for board in boards100:
+        if not check_solvable(board):
+            unsolv+=1
+    test = BoardWrapper((1, 2, 3, 4, 5, 6, 7, 0, 8), None, 0, 0)
+    print(check_solvable(test))
+    print(boards100[0])
     # print("manhattan", calculateDistanceManhattan(startBoard))
     # print("manhattan2", calculateDistanceManhattan2(startBoard))
     # print("hamming", calculateDistanceHamming(startBoard))
@@ -182,10 +192,28 @@ if __name__ == '__main__':
     # print("dist list index", calculateDistanceList(startBoard))
     # print("A* ", calculateDistanceASTAR(startBoard))
     # print()
-
+    print(unsolv)
     # run the puzzlesolver on the created random list
+    run_puzzle_solver(boards100, heuristic.manhattan, 1)
+    print("a", len(results[1])-1)
+    while len(results[1])-1 != 100 - unsolv:
+        print(("a", len(results[1])-1), end="\r")
+        pass
+    print("a2", len(results[1])-1)
+    run_puzzle_solver(boards100, heuristic.astar, 0)
+    print("b", len(results[0])-1)
+    while len(results[0])-1 != 100 - unsolv:
+        print(("a", len(results[0])-1), end="\r")
+        pass
+    print("b2", len(results[0])-1)
+    run_puzzle_solver(boards100, heuristic.hamming2, 2)
+    print("c", len(results[2])-1)
+    while len(results[2])-1 != 100 - unsolv:
+        print(("a", len(results[2])-1), end="\r")
+        pass
+    print("c2", len(results[1])-1)
     # todo ui = threading.Thread()
-    astar = multiprocessing.Process(target=run_puzzle_solver, args=(boards100, heuristic.astar, 0))
+    """astar = multiprocessing.Process(target=run_puzzle_solver, args=(boards100, heuristic.astar, 0))
     manhattan = multiprocessing.Process(target=run_puzzle_solver, args=(boards100, heuristic.manhattan, 1))
     hamming = multiprocessing.Process(target=run_puzzle_solver, args=(boards100, heuristic.hamming, 2))
 
@@ -193,6 +221,22 @@ if __name__ == '__main__':
     manhattan.start()
     hamming.start()
 
+    astar.join()
+    manhattan.join()
+    hamming.join()"""
+
+    print(len(results[0]))
+    print(len(results[1]))
+    print(len(results[2]))
+    print(results[0])
+    print(results[1])
+    print(results[2])
+    for result_list in results:
+        for result in result_list:
+            if result[0] != "unsolvable" and result[0] != None:
+                json_w = {"board": result[0].board}
+    with open("test_data.json", "wb") as file:
+        pickle.dump(results, file, pickle.HIGHEST_PROTOCOL)
     # b=[]
     # s=0
     # while a.previous_board:
