@@ -2,14 +2,12 @@ import time
 import threading
 import multiprocessing
 from multiprocessing.pool import ThreadPool
-
 import json
 import pickle
 import generateRandomBoards
 import heuristic
 from BoardWrapper import BoardWrapper
-
-
+from ui import Loading
 
 end_board = (1, 2, 3, 4, 5, 6, 7, 8, 0)
 swap_positions = {
@@ -57,7 +55,7 @@ def add_to_pipeline(pipeline_list, board_wrapper, heuristics, list_of_moves):
         for i in range(len(pipeline_list)):  # enter neighbours into pipelinelist, ordered after cost
             if pipeline_list[i].distance > dist:
                 """for j in range(i, len(pipeline_list)):
-                    if pipeline_list[j].board is board: #Todo: mabey chack steps
+                    if pipeline_list[j].board is board:  # Todo: mabey chack steps
                         pipeline_list.pop(j)"""
                 pipeline_list.insert(i, board_wrapper)
                 return pipeline_list
@@ -82,13 +80,21 @@ def search_step(pipeline_list, heuristics, list_of_moves):
 
     board = board_wrapper.board
     list_of_moves.append(board)  # put it into the already-checked-boards-list to not check again
-
+    if board == end_board:  # Makes the code run 10000 times faster (or so)
+        return board_wrapper
     pipeline_list.pop(0)  # and delete the element from the pipeline
     # und dann hardcoden, aber irgendwas kann mir da schon einfallen für jede größe?
     for position in range(len(board)):
         if board[position] == 0:
             for swap_position in swap_positions[position]:
-                add_to_pipeline(pipeline_list, swap(board_wrapper, position, swap_position), heuristics, list_of_moves)
+                new_board = swap(board_wrapper, position, swap_position)
+                b = new_board.previous_board
+                while b:
+                    if new_board.board == b.board:
+                        break
+                    b = b.previous_board
+                else:
+                    add_to_pipeline(pipeline_list, new_board, heuristics, list_of_moves)
             break
     return board_wrapper
 
@@ -96,6 +102,7 @@ def search_step(pipeline_list, heuristics, list_of_moves):
 def slide(start_board_wrapper, current_heuristic, pipeline_list,
           index):  # finally the searching method: start is the the board to be checked with certain
     # heuristic
+    start = time.time()
     list_of_moves = []
     add_to_pipeline(pipeline_list, start_board_wrapper, current_heuristic,
                     list_of_moves)  # add the first board to the pipeline
@@ -104,7 +111,7 @@ def slide(start_board_wrapper, current_heuristic, pipeline_list,
     for counter in range(182000):
         if list_of_moves[-1] == end_board:
             # print("found after ", len(list_of_moves) - 1, "moves")
-            results[index].append((current_board_wrapper, len(list_of_moves)))
+            results[index].append((current_board_wrapper, len(list_of_moves), time.time()-start))
             return current_board_wrapper, len(list_of_moves)
         current_board_wrapper = search_step(pipeline_list, current_heuristic,
                                             list_of_moves)  # repeat introducing boards into pipeline
@@ -126,16 +133,15 @@ def run_puzzle_solver(board_wrapper_list, current_heuristic, index):
         # print(check_solvable(start_board_wrapper))
         if check_solvable(start_board_wrapper):
             pool.apply_async(slide, (start_board_wrapper, current_heuristic, pipeline_list, index))
-            #print(board_wrapper_index)
+            # print(board_wrapper_index)
         else:
             # print("unsolvable")
             num_of_unsolvable += 1
             # results[index].append(("unsolvable", 0))
-    #pool.close()
-    #pool.join()
-    results[index].append([None, num_of_unsolvable, (time.time() - starting_time), current_heuristic.__name__])
-    print("done", (time.time() - starting_time), current_heuristic.__name__, num_of_unsolvable)
-    print(results)
+    pool.close()
+    pool.join()
+    #print("done", (time.time() - starting_time), current_heuristic.__name__, num_of_unsolvable)
+    #print(results)
     # print(results[index][0][0].previous_board.board)
     # print(num_of_unsolvable, "unsolvable puzzles found")
     # print(current_heuristic.__name__, "solution for the other", 100 - num_of_unsolvable, "puzzles found in",
@@ -143,6 +149,42 @@ def run_puzzle_solver(board_wrapper_list, current_heuristic, index):
     # print("with a total of", totalMoves, "steps")
     # print()
     # return solved
+
+
+def handle_start(input_letter, num_of_boards):
+    print("Loading, please wait...")
+    boards100 = generateRandomBoards.create_random_list(num_of_boards)
+    results[0] = []
+    results[1] = []
+    results[2] = []
+
+    unsolv = 0
+    for board in boards100:
+        if not check_solvable(board):
+            unsolv += 1
+    start_time = time.time()
+    if "H" in input_letter:
+        run_puzzle_solver(boards100, heuristic.hamming1, 2)
+        while len(results[2]) != num_of_boards - unsolv:
+            pass
+        results[2].append([None, unsolv, (time.time() - start_time), "hamming"])
+    start_time = time.time()
+    if "M" in input_letter:
+        run_puzzle_solver(boards100, heuristic.manhattan, 1)
+        while len(results[1]) != num_of_boards - unsolv:
+            pass
+        results[1].append([None, unsolv, (time.time() - start_time), "manhattan"])
+    start_time = time.time()
+    if "aS" in input_letter:
+        run_puzzle_solver(boards100, heuristic.astar, 0)
+        while len(results[0]) != num_of_boards - unsolv:
+            pass
+        results[0].append([None, unsolv, (time.time() - start_time), "astar"])
+
+    result = results
+    ui = Loading()
+    ui.heuristic_options(result)
+
 
 
 if __name__ == '__main__':
@@ -175,14 +217,15 @@ if __name__ == '__main__':
 
     # generate a certain number of boards, here 100 boards
     start_time = time.time()
-    boards100 = generateRandomBoards.create_random_list(100)
+    num_of_boards = 100
+    boards100 = generateRandomBoards.create_random_list(num_of_boards)
     # print("boards were generated in ", (time.time() - start_time), " seconds")
     # for k in range(len(boards100)):
     # print(k + 1, " ", boards100[k])
     unsolv = 0
     for board in boards100:
         if not check_solvable(board):
-            unsolv+=1
+            unsolv += 1
     test = BoardWrapper((1, 2, 3, 4, 5, 6, 7, 0, 8), None, 0, 0)
     print(check_solvable(test))
     print(boards100[0])
@@ -197,23 +240,24 @@ if __name__ == '__main__':
     print(unsolv)
     # run the puzzlesolver on the created random list
     run_puzzle_solver(boards100, heuristic.manhattan, 1)
-    print("a", len(results[1])-1)
-    while len(results[1])-1 != 100 - unsolv:
-        print(("a", len(results[1])-1), end="\r")
-        pass
-    print("a2", len(results[1])-1)
+    print("a", len(results[1]) - 1)
+    while len(results[1]) - 1 != num_of_boards - unsolv:
+        print(("a", len(results[1]) - 1), end="\r")
+
+    print("a2", len(results[1]) - 1)
+
     run_puzzle_solver(boards100, heuristic.astar, 0)
-    print("b", len(results[0])-1)
-    while len(results[0])-1 != 100 - unsolv:
-        print(("b", len(results[0])-1), end="\r")
-        pass
-    print("b2", len(results[0])-1)
+    print("b", len(results[0]) - 1)
+    while len(results[0]) - 1 != num_of_boards - unsolv:
+        print(("b", len(results[0]) - 1), end="\r")
+
+    print("b2", len(results[0]) - 1)
+
     run_puzzle_solver(boards100, heuristic.hamming1, 2)
-    print("c", len(results[2])-1)
-    while len(results[2])-1 != 100 - unsolv:
-        print(("c", len(results[2])-1), end="\r")
-        pass
-    print("c2", len(results[2])-1)
+    print("c", len(results[2]) - 1)
+    while len(results[2]) - 1 != num_of_boards - unsolv:
+        print(("c", len(results[2]) - 1), end="\r")
+    print("c2", len(results[2]) - 1)
 
     for i in results[2]:
         try:
@@ -239,10 +283,7 @@ if __name__ == '__main__':
     print(results[0])
     print(results[1])
     print(results[2])
-    for result_list in results:
-        for result in result_list:
-            if result[0] != "unsolvable" and result[0] != None:
-                json_w = {"board": result[0].board}
+
     with open("test_data.json", "wb") as file:
         pickle.dump(results, file, pickle.HIGHEST_PROTOCOL)
     # b=[]
