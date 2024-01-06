@@ -1,7 +1,7 @@
 import random
 import json
 
-
+from BoardWrapper import BoardWrapper
 # from https://www.tutorialspoint.com/How-to-generate-non-repeating-random-numbers-in-Python on 1.2.24 20:00
 
 def create_random_board():
@@ -9,7 +9,8 @@ def create_random_board():
     random_board = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     random.shuffle(random_board)
     # traversing the loop 9 times
-    return tuple(random_board)
+    board_wrapper = BoardWrapper(tuple(random_board), None, 0, 9999)
+    return board_wrapper
 
 
 def create_random_list(number):
@@ -22,8 +23,9 @@ def create_random_list(number):
 
 
 if __name__ == "__main__":
-    list_hundred = create_random_list(100)
+    print(create_random_list(10))
+    """list_hundred = create_random_list(100)
     list_thousand = create_random_list(1000)
     list_ten_thousand = create_random_list(10000)
     with open("boards.json", "w") as file:
-        file.write(json.dumps({"100": list_hundred, "1000": list_thousand, "10000": list_ten_thousand}))
+        file.write(json.dumps({"100": list_hundred, "1000": list_thousand, "10000": list_ten_thousand}))"""

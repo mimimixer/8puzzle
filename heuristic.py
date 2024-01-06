@@ -1,5 +1,5 @@
 # calculateDistance
-
+from BoardWrapper import BoardWrapper
 # import puzzleSolver
 from scipy.spatial.distance import hamming
 from scipy.spatial.distance import cityblock
@@ -7,7 +7,8 @@ from scipy.spatial.distance import cityblock
 
 # endBoard = puzzleSolver.endBoard
 
-def manhattan(board, end_board):
+def manhattan(board_wrapper, end_board):
+    board = board_wrapper.board
     dist = 0
     for i in range(len(board)):
         element = board[i]
@@ -16,14 +17,16 @@ def manhattan(board, end_board):
             dist_row = int(should / 3) - int(i / 3)
             dist_col = should % 3 - i % 3
             dist += abs(dist_col) + abs(dist_row)
-    return dist
+    return board_wrapper.steps + dist
 
 
-def manhattan2(board, end_board):
+def manhattan2(board_wrapper, end_board):
+    board = board_wrapper.board
     return cityblock(board, end_board)
 
 
-def hamming(board, end_board):
+def hamming(board_wrapper, end_board):
+    board = board_wrapper.board
     dist = 0
     for i in range(len(board)):
         element = board[i]
@@ -31,21 +34,24 @@ def hamming(board, end_board):
             should = end_board.index(element)
             if i != should:
                 dist += 1
-    return dist
+    return board_wrapper.steps + dist
 
 
-def hamming2(board, end_board):
+def hamming2(board_wrapper, end_board):
+    board = board_wrapper.board
     return hamming(board, end_board) * len(board)
 
 
-def calculate_distance_simple(board, end_board):
+def calculate_distance_simple(board_wrapper, end_board):
+    board = board_wrapper.board
     dist = 0
     for i in range(len(board)):
         dist += abs(end_board[i] - board[i])
     return dist
 
 
-def calculate_distance_list(board, end_board):
+def calculate_distance_list(board_wrapper, end_board):
+    board = board_wrapper.board
     dist = 0
     for i in range(len(board)):
         element = board[i]
@@ -53,7 +59,8 @@ def calculate_distance_list(board, end_board):
     return dist
 
 
-def astar(board, end_board):
+def astar(board_wrapper, end_board):
+    board = board_wrapper.board
     dist = 0
     for i in range(len(board)):
         element = board[i]
@@ -62,4 +69,4 @@ def astar(board, end_board):
             dist_row = should / 3 - i / 3
             dist_col = should % 3 - i % 3
             dist += int(abs(dist_col + int(dist_row)) * 1.2)
-    return dist
+    return board_wrapper.steps + dist
