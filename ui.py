@@ -94,6 +94,7 @@ class Loading():
             elif heuristic_value == "aS":
                 valid = heuristic.display_heuristic(0, results)
             elif heuristic_value == "exit":
+                print("Thanks for trying this program!")
                 exit()
             elif heuristic_value == "start":
                 self.start()
