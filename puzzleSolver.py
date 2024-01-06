@@ -187,7 +187,7 @@ def handle_start(input_letter, num_of_boards):
 
 
 
-if __name__ == '__main__':
+"""if __name__ == '__main__':
     # define how endboard has to look like - 2 versions
     # boards are constructed as tupels: ordered, not changeble (just to be sure we don't mess it up :D)
     # endBoard = (0,1,2,3,4,5,6,7,8)
@@ -334,3 +334,4 @@ if __name__ == '__main__':
 # print(pipelineList[0])
 # print(pipelineList[1][1])
 # prettyPrint(endBoard)
+"""
