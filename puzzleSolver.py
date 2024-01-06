@@ -211,9 +211,9 @@ def handle_start(input_letter, num_of_boards):
     tryboard2 = (4, 6, 1, 2, 0, 3, 7, 5, 8)
     tryboard3 = (1, 2, 3, 4, 5, 6, 8, 7, 0)
 
-    """print("try1", check_solvable(tryboard1))
+    print("try1", check_solvable(tryboard1))
     print("try2", check_solvable(tryboard2))
-    print("try3", check_solvable(tryboard3))"""
+    print("try3", check_solvable(tryboard3))
 
     # generate a certain number of boards, here 100 boards
     start_time = time.time()
@@ -265,7 +265,7 @@ def handle_start(input_letter, num_of_boards):
         except:
             pass
     # todo ui = threading.Thread()
-    """astar = multiprocessing.Process(target=run_puzzle_solver, args=(boards100, heuristic.astar, 0))
+    astar = multiprocessing.Process(target=run_puzzle_solver, args=(boards100, heuristic.astar, 0))
     manhattan = multiprocessing.Process(target=run_puzzle_solver, args=(boards100, heuristic.manhattan, 1))
     hamming = multiprocessing.Process(target=run_puzzle_solver, args=(boards100, heuristic.hamming, 2))
 
@@ -275,7 +275,7 @@ def handle_start(input_letter, num_of_boards):
 
     astar.join()
     manhattan.join()
-    hamming.join()"""
+    hamming.join()
 
     print(len(results[0]))
     print(len(results[1]))
