@@ -9,6 +9,8 @@ import generateRandomBoards
 import heuristic
 from BoardWrapper import BoardWrapper
 
+
+
 end_board = (1, 2, 3, 4, 5, 6, 7, 8, 0)
 swap_positions = {
     0: [1, 3],
@@ -124,7 +126,7 @@ def run_puzzle_solver(board_wrapper_list, current_heuristic, index):
         # print(check_solvable(start_board_wrapper))
         if check_solvable(start_board_wrapper):
             pool.apply_async(slide, (start_board_wrapper, current_heuristic, pipeline_list, index))
-            print(board_wrapper_index)
+            #print(board_wrapper_index)
         else:
             # print("unsolvable")
             num_of_unsolvable += 1
@@ -203,15 +205,21 @@ if __name__ == '__main__':
     run_puzzle_solver(boards100, heuristic.astar, 0)
     print("b", len(results[0])-1)
     while len(results[0])-1 != 100 - unsolv:
-        print(("a", len(results[0])-1), end="\r")
+        print(("b", len(results[0])-1), end="\r")
         pass
     print("b2", len(results[0])-1)
-    run_puzzle_solver(boards100, heuristic.hamming2, 2)
+    run_puzzle_solver(boards100, heuristic.hamming1, 2)
     print("c", len(results[2])-1)
     while len(results[2])-1 != 100 - unsolv:
-        print(("a", len(results[2])-1), end="\r")
+        print(("c", len(results[2])-1), end="\r")
         pass
-    print("c2", len(results[1])-1)
+    print("c2", len(results[2])-1)
+
+    for i in results[2]:
+        try:
+            print(i[0].board, i[0].steps)
+        except:
+            pass
     # todo ui = threading.Thread()
     """astar = multiprocessing.Process(target=run_puzzle_solver, args=(boards100, heuristic.astar, 0))
     manhattan = multiprocessing.Process(target=run_puzzle_solver, args=(boards100, heuristic.manhattan, 1))

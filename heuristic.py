@@ -25,7 +25,7 @@ def manhattan2(board_wrapper, end_board):
     return cityblock(board, end_board)
 
 
-"""def hamming(board_wrapper, end_board):
+def hamming1(board_wrapper, end_board):
     board = board_wrapper.board
     dist = 0
     for i in range(len(board)):
@@ -34,7 +34,7 @@ def manhattan2(board_wrapper, end_board):
             should = end_board.index(element)
             if i != should:
                 dist += 1
-    return (board_wrapper.steps + dist) * len(board)"""
+    return (board_wrapper.steps + dist) * len(board)
 
 
 def hamming2(board_wrapper, end_board):
@@ -68,5 +68,5 @@ def astar(board_wrapper, end_board):
             should = end_board.index(element)
             dist_row = should / 3 - i / 3
             dist_col = should % 3 - i % 3
-            dist += int(abs(dist_col + int(dist_row)) * 1.2)
+            dist += int(abs(dist_col + int(dist_row)))
     return board_wrapper.steps + dist

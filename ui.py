@@ -1,5 +1,6 @@
 from tqdm import tqdm
 from time import sleep
+import pickle
 #ToDo:
     # diagramme draw.io -> Angabe schauen
     # Moritz mein FinalProtocol in Neta schicken
@@ -106,6 +107,9 @@ class Loading():
 
 
 if __name__ == "__main__":
-    loading = Loading()
-    loading.loading_bar()
-    loading.heuristic_options()
+    with open("test_data.json", "rb") as file:
+        results = pickle.load(file)
+    print(results)
+    #loading = Loading()
+    #loading.loading_bar()
+    #loading.heuristic_options()
