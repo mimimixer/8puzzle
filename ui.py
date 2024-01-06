@@ -86,6 +86,13 @@ class Loading():
                 print("If you want to exit, please enter \"exit\".")
                 heuristic.display_heuristic(heuristic_index, results)
 
+    def pretty_print(self, board):  # method for printing board in 3 rows
+        for i in range(3):
+            for j in range(3):
+                print(board[i * 3 + j], end=" ")
+                if j == 2:
+                    print()
+
 
 if __name__ == "__main__":
     loading = Loading()
