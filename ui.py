@@ -1,13 +1,25 @@
 from tqdm import tqdm
-
+from time import sleep
 #ToDo:
     # diagramme draw.io -> Angabe schauen
     # Moritz mein FinalProtocol in Neta schicken
 class Loading():
 
     def loading_bar(self):
-        for i in tqdm(range(100), desc="Loadig..."):
-            pass
+        results = []
+        heuristic = Loading()
+        bar = tqdm(range(0, 100), total=100, desc="Loadig...")
+        for i in bar:
+            if self.display_heuristic(0, results):
+                sleep(.1)
+            elif self.display_heuristic(1, results):
+                sleep(.1)
+            elif self.display_heuristic(2, results):
+                sleep(.1)
+            if i == len(bar)-1:
+                bar.set_description(desc="Loaded successfully")
+            sleep(.1)
+
 
     def heuristic_options(self):
         results = []
@@ -23,10 +35,9 @@ class Loading():
         print("")
         valid = False
         while not valid:
+            print("If you want to exit, enter 'exit'.")
             print("Please enter your heuristic (H or M or aS): ", end="")
             heuristic_value = input()
-            print()
-            print("If you want to exit, please type 'exit'.")
             if heuristic_value == "H":
                 heuristic.display_heuristic(2, results)
                 valid = True
@@ -44,7 +55,7 @@ class Loading():
     def display_heuristic(self, heuristic_index, results):
         heuristic = Loading()
         if results == []:
-            print("tada")
+            #print("tada")
             return
         result = results[heuristic_index]
         for index in range(len(result)):
@@ -65,7 +76,7 @@ class Loading():
             print("If you want to exit, please enter \"exit\".")
             choice = input()
             if choice == "exit":
-                heuristic_options()
+                self.heuristic_options()
             elif choice.isdigit():
                 choice = int(choice)
                 if 0 < choice <= 100:
@@ -96,5 +107,5 @@ class Loading():
 
 if __name__ == "__main__":
     loading = Loading()
-    # loading.loading_bar()
+    loading.loading_bar()
     loading.heuristic_options()
