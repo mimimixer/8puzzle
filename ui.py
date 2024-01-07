@@ -1,10 +1,5 @@
 import puzzleSolver
 
-
-#ToDo:
-# diagramme draw.io -> Angabe schauen
-
-
 class Loading:
 
     def start(self): #acts like a homescreen
