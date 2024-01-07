@@ -1,6 +1,7 @@
 import time
 import threading
 import multiprocessing
+from _heapq import heappush, heappop, _heappop_max
 from multiprocessing.pool import ThreadPool
 import json
 import pickle
@@ -8,6 +9,7 @@ import generateRandomBoards
 import heuristic
 from BoardWrapper import BoardWrapper
 from ui import Loading
+from queue import PriorityQueue
 
 end_board = (1, 2, 3, 4, 5, 6, 7, 8, 0)
 swap_positions = {
@@ -47,20 +49,27 @@ needs:
 def add_to_pipeline(pipeline_list, board_wrapper, heuristics, list_of_moves):
     # alreadychecked = any(board in sublist for sublist in listOfMoves)
     board = board_wrapper.board
-    if board in list_of_moves:  # if board already checked, skip
-        return
+    # if board in list_of_moves:  # if board already checked, skip
+    #    return
     board_wrapper.distance = heuristics(board_wrapper, end_board)  # calculate remaining distance to endboard
     dist = board_wrapper.distance
-    if pipeline_list:  # if list not empty
+    if dist == board_wrapper.steps:
+        dist = 0
+    # start = time.time()
+    heappush(pipeline_list, (dist, board_wrapper))
+    # print(time.time() - start)
+    # pipeline_list.put((dist, board_wrapper))
+    return pipeline_list
+    """if pipeline_list:  # if list not empty
         for i in range(len(pipeline_list)):  # enter neighbours into pipelinelist, ordered after cost
             if pipeline_list[i].distance > dist:
-                """for j in range(i, len(pipeline_list)):
+                """"""for j in range(i, len(pipeline_list)):
                     if pipeline_list[j].board is board:  # Todo: mabey chack steps
-                        pipeline_list.pop(j)"""
+                        pipeline_list.pop(j)""""""
                 pipeline_list.insert(i, board_wrapper)
                 return pipeline_list
     pipeline_list.append(board_wrapper)
-    return pipeline_list
+    return pipeline_list"""
 
 
 def swap(board_wrapper, x, y):  # method for creating neighbouring boards, as tupels are not changeble
@@ -76,69 +85,86 @@ def swap(board_wrapper, x, y):  # method for creating neighbouring boards, as tu
 
 def search_step(pipeline_list, heuristics, list_of_moves):
     # method to search for the neighbours of the current board, depending of the location of the empty cell (=0)
-    board_wrapper = pipeline_list[0]  # take first item of pipelinelist, that is element with smallest cost
-
+    board_wrapper = heappop(pipeline_list)[1]  # take first item of pipelinelist, that is element with smallest cost
     board = board_wrapper.board
     list_of_moves.append(board)  # put it into the already-checked-boards-list to not check again
+    # pipeline_list.pop(0)
+
     if board == end_board:  # Makes the code run 10000 times faster (or so :) )
-        return board_wrapper
-    pipeline_list.pop(0)  # and delete the element from the pipeline
+        return board_wrapper, True
+
     for position in range(len(board)):
         if board[position] == 0:
             for swap_position in swap_positions[position]:
+                # start = time.time()
+                if board_wrapper.previous_board and board_wrapper.previous_board.board[swap_position] == 0:
+                    continue
                 new_board = swap(board_wrapper, position, swap_position)
+                if new_board.steps > 32:
+                    continue
                 b = new_board.previous_board
-                while b:
+                for i in range(new_board.steps - 1):  # looks at all previous boards to eliminate duplicates
                     if new_board.board == b.board:
+                        # print(time.time()-start)
                         break
                     b = b.previous_board
                 else:
+                    # print(time.time()-start)
                     add_to_pipeline(pipeline_list, new_board, heuristics, list_of_moves)
             break
-    return board_wrapper
+    return board_wrapper, False
 
 
-def slide(start_board_wrapper, current_heuristic, pipeline_list,
+def slide(start_board_wrapper, current_heuristic,
           index):  # finally the searching method: start is the the board to be checked with certain
     # heuristic
     start = time.time()
     list_of_moves = []
+    pipeline_list = PriorityQueue()
+    pipeline_list = []
     add_to_pipeline(pipeline_list, start_board_wrapper, current_heuristic,
                     list_of_moves)  # add the first board to the pipeline
-    current_board_wrapper = search_step(pipeline_list, current_heuristic,
-                                        list_of_moves)  # introduce neighbours into pipeline
-    for counter in range(182000):
-        if list_of_moves[-1] == end_board:
-            results[index].append([current_board_wrapper, len(list_of_moves), time.time()-start])
-            #print(len(results[index]))
+    current_board_wrapper, done = search_step(pipeline_list, current_heuristic,
+                                              list_of_moves)  # introduce neighbours into pipeline
+    for counter in range(1820000):
+        # print(counter)
+        if done:
+            results[index].append([current_board_wrapper, len(list_of_moves), time.time() - start])
+            # print(len(results[index]))
             return current_board_wrapper, len(list_of_moves)
-        current_board_wrapper = search_step(pipeline_list, current_heuristic,
-                                            list_of_moves)  # repeat introducing boards into pipeline
+        current_board_wrapper, done = search_step(pipeline_list, current_heuristic,
+                                                  list_of_moves)  # repeat introducing boards into pipeline
+    else:
+        print("too many moves")
 
 
 def run_puzzle_solver(board_wrapper_list, current_heuristic, index):
     # run the solving algorithm for a whole list of board while cheing the time for fining solution. check for
     # solvability first. return number of unsolvable puzzles in list, number of solvable puzzles and time for
     # finding solution
-    pool = ThreadPool(processes=100)
+    pool = ThreadPool()
     num_of_unsolvable = 0
     for board_wrapper_index in range(len(board_wrapper_list)):
         # print(end=str(board_wrapper_index) + " ")
         start_board_wrapper = board_wrapper_list[board_wrapper_index]
         # print(check_solvable(start_board_wrapper))
         if check_solvable(start_board_wrapper):
-            pipeline_list = []
-            pool.apply_async(slide, (start_board_wrapper, current_heuristic, pipeline_list, index))
+            start = time.time()
+            # print(time.time())
+            # slide(start_board_wrapper, current_heuristic, index)
+            # print(time.time()-start)
             # print(board_wrapper_index)
+            pool.apply_async(slide, (start_board_wrapper, current_heuristic, index))
         else:
             # print("unsolvable")
             num_of_unsolvable += 1
             # results[index].append(("unsolvable", 0))
     pool.close()
-    print(multiprocessing.cpu_count())
+    # pool.join()
+    # print(multiprocessing.cpu_count())
 
-    #print("done", (time.time() - starting_time), current_heuristic.__name__, num_of_unsolvable)
-    #print(results)
+    # print("done", (time.time() - starting_time), current_heuristic.__name__, num_of_unsolvable)
+    # print(results)
     # print(results[index][0][0].previous_board.board)
     # print(num_of_unsolvable, "unsolvable puzzles found")
     # print(current_heuristic.__name__, "solution for the other", 100 - num_of_unsolvable, "puzzles found in",
@@ -150,45 +176,65 @@ def run_puzzle_solver(board_wrapper_list, current_heuristic, index):
 
 def handle_start(input_letter, num_of_boards):
     print("Loading, please wait...")
-    boards100 = generateRandomBoards.create_random_list(num_of_boards)
+
+    if num_of_boards == -1:
+        with open("boards.txt", "rb") as file:  # loads pregenerated boards for testing
+            boards100 = pickle.load(file)
+        num_of_boards = 100
+    else:
+        boards100 = generateRandomBoards.create_random_list(num_of_boards)
+
+    boards100 = sorted(boards100, key=lambda x: x.distance, reverse=True)
+
     results[0] = []
     results[1] = []
     results[2] = []
-    boards100 = sorted(boards100, key=lambda x: x.distance, reverse=True)
     unsolv = 0
-    for board in boards100:
+    for board in boards100:  # calculate number of unsolvable boards
         if not check_solvable(board):
             unsolv += 1
+
+    test = {"H": 0, "M": 0, "aS": 0}
     start_time = time.time()
+
     if "H" in input_letter:
+        test["H"] = num_of_boards - unsolv
+        # print(num_of_boards - unsolv)
+        h_time = time.time()
         run_puzzle_solver(boards100, heuristic.hamming1, 2)
         while len(results[2]) != num_of_boards - unsolv:
-            #print(len(results[2]))
+        # print(len(results[2]))
             pass
+        results[2].append([None, unsolv, (time.time() - h_time), "hamming"])
         print("Hamming has finished!")
-        results[2].append([None, unsolv, (time.time() - start_time), "hamming"])
-    start_time = time.time()
+
     if "M" in input_letter:
+        test["M"] = num_of_boards - unsolv
+        m_time = time.time()
         run_puzzle_solver(boards100, heuristic.manhattan, 1)
         while len(results[1]) != num_of_boards - unsolv:
-            #print(len(results[1]))
+        # print(len(results[1]))
             pass
+        results[1].append([None, unsolv, (time.time() - m_time), "manhattan"])
         print("Manhattan has finished!")
-        results[1].append([None, unsolv, (time.time() - start_time), "manhattan"])
-    start_time = time.time()
+
     if "aS" in input_letter:
+        test["aS"] = num_of_boards - unsolv
+        aS_time = time.time()
         run_puzzle_solver(boards100, heuristic.astar, 0)
         while len(results[0]) != num_of_boards - unsolv:
-            #print(len(results[0]))
+        # print(len(results[0]))
             pass
+        results[0].append([None, unsolv, (time.time() - aS_time), "astar"])
         print("aStar has finished!")
-        results[0].append([None, unsolv, (time.time() - start_time), "astar"])
+    # print(unsolv)
+    # print()
 
+    # print(time.time() - start_time)
     result = results
-    return result
-    #ui = Loading()
-    #ui.heuristic_options(result)
-
+    # return result
+    ui = Loading()
+    ui.heuristic_options(result)
 
 
 """if __name__ == '__main__':

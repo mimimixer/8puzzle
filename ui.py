@@ -6,14 +6,13 @@ import puzzleSolver
 import os
 
 
-# ToDo:
+#ToDo:
 # diagramme draw.io -> Angabe schauen
-# Moritz mein FinalProtocol in Neta schicken
 
 
-class Loading():
+class Loading:
 
-    """ def loading_bar(self):
+    def loading_bar(self):
         results = []
         heuristic = Loading()
         bar = tqdm(range(0, 100), total=100, desc="Loadig...")
@@ -26,18 +25,45 @@ class Loading():
                 sleep(.1)
             if i == len(bar) - 1:
                 bar.set_description(desc="Loaded successfully")
-            sleep(.1)"""
+            sleep(.1)
 
-    def start(self):    #UI to display different heuristics
+    def old_results(self):
+        ui = Loading()
+        valid = False
+        while not valid:
+            print("1: result_data0")
+            print("2: result_data1")
+            choice = input("Choose what data to look at: ")
+            if choice == "1" or choice == "2":
+                valid = True
+        path = "result_data" + str(int(choice)-1) + ".json"
+        print(path)
+        with open(path, "rb") as file:
+            results = pickle.load(file)
+        ui.heuristic_options(results)
+
+
+    def start(self):
         heuristic = Loading()
         puzzle = puzzleSolver
+        valid = False
+        while not valid:
+            choice = input("Hello, do you want to look at pregenerated results or create new ones? [old new] ")
+            if choice == "old":
+                heuristic.old_results()
+            elif choice == "new":
+                valid = True
+            elif choice == "test":
+                puzzle.handle_start("H&M&aS", -1)
+
+        valid = False
         try:
             num_of_boards = int(
                 input("Hello, how many boards would you like to have solved?[1-1000] ").replace(" ", ""))
-        except: #ask user how many board should be solved, however 0 is not option, as you have to display at least one board
+        except:
             num_of_boards = 0
-        while not (1 <= num_of_boards <= 1000): #if input was smaller than zero or higher than one thousand boards, you get redirected
-            try: #while loop ends as soon as the input is valid
+        while not (1 <= num_of_boards <= 1000):
+            try:
                 num_of_boards = int(
                     input("Your input was invalid, how many boards would you like to have solved?[1-1000] ").replace(
                         " ", ""))
@@ -46,11 +72,11 @@ class Loading():
         valid_before = False
         while not valid_before:
             print("Do you want to load all Heuristics [all] or just a specific one [specific]? ", end="")
-            heuristic_value = input().replace(" ", "") #ask if user wants to display all heuristics or just a specific
-            if heuristic_value == "all": #display all heuristics
+            heuristic_value = input().replace(" ", "")
+            if heuristic_value == "all":
                 puzzle.handle_start("H&M&aS", num_of_boards)
-                valid_before = True #set valid true so that while loop ends
-            elif heuristic_value == "specific": #ony display a specific heuristic
+                valid_before = True
+            elif heuristic_value == "specific":
                 valid_before = True
                 print("")
                 print("H = Hamming, M = Manhattan, aS = aStar")
@@ -59,20 +85,20 @@ class Loading():
                 while not valid:
                     print("If you want to exit, enter 'exit'.")
 
-                    print("Please enter your heuristic [H/M/aS/H&M/H&aS/M&aS/H&M&aS]: ", end="") #ask which one should be displayed
-                    heuristic_value = input().replace(" ", "") # a combination of more than one heuristic can be made
+                    print("Please enter your heuristic [H/M/aS/H&M/H&aS/M&aS/H&M&aS]: ", end="")
+                    heuristic_value = input().replace(" ", "")
                     if heuristic_value in input_choice:
-                        puzzle.handle_start(heuristic_value, num_of_boards) #call handle_start function in puzzlesolver
+                        puzzle.handle_start(heuristic_value, num_of_boards)
                         valid = True
-                    elif heuristic_value == "exit": #possability to exit while loop without displaying a heuristic
+                    elif heuristic_value == "exit":
                         valid = True
                     else:
-                        print("Input is invalid. Please try again.") #input invalid
-
+                        print("Input is invalid. Please try again.")
+        else:
+            print("Input is invalid. Please try again.")
 
     def heuristic_options(self, results):
         heuristic = Loading()
-        print("")
         print("")
         print("        Choose a heuristic")
         print("    'H'   ", end="")
@@ -81,13 +107,13 @@ class Loading():
         print(" [Hamming] ", end="")
         print(" [Manhattan] ", end="")
         print(" [aStar] ")
-        print("") #prints for layout purposes
+        print("")
         valid = False
         while not valid:
             print("If you want to exit, enter 'exit'.  If you want to start again enter 'start'.")
-            print("Please enter your heuristic (H or M or aS): ", end="") #which heuristic should be displayed
+            print("Please enter your heuristic (H or M or aS): ", end="")
             heuristic_value = input().replace(" ", "")
-            if heuristic_value == "H": #calls display method to display correct heuristic
+            if heuristic_value == "H":
                 valid = heuristic.display_heuristic(2, results)
             elif heuristic_value == "M":
                 valid = heuristic.display_heuristic(1, results)
@@ -96,52 +122,52 @@ class Loading():
             elif heuristic_value == "exit":
                 print("Thanks for trying this program!")
                 exit()
-            elif heuristic_value == "start": #if input = 'start' then call start method
+            elif heuristic_value == "start":
                 self.start()
             else:
-                print("Input is invalid. Please try again.") #input is invalid
+                print("Input is invalid. Please try again.")
 
     def display_heuristic(self, heuristic_index, results):
-        if results[heuristic_index]: #if results inclued a heuristic
+        if results[heuristic_index]:
             heuristic = Loading()
             result = results[heuristic_index]
             avg_nodes = 0
             avg_time = 0
             max_nodes = 0
             min_nodes = 190000
-            min_time = 1000000  #set range
+            min_time = 1000000
             max_time = 0
             c = 0
-            for res in result: #go through results
+            for res in result:
                 if res[0]:
-                    c += 1 #increase counter/steps
-                    min_nodes = min(min_nodes, res[1]) #set min nodes
-                    max_nodes = max(max_nodes, res[1]) #set max nodes
+                    c += 1
+                    min_nodes = min(min_nodes, res[1])
+                    max_nodes = max(max_nodes, res[1])
 
-                    min_time = min(min_time, res[2]) #set min time
-                    max_time = max(max_time, res[2]) #set max time
+                    min_time = min(min_time, res[2])
+                    max_time = max(max_time, res[2])
 
-                    avg_nodes += res[1] #add nodes to average
-                    avg_time += res[2] #add time to average
-            avg_nodes = avg_nodes / c #calculate nodes by dividing by step
-            avg_time = avg_time / c #calculate time by dividing by step
+                    avg_nodes += res[1]
+                    avg_time += res[2]
+            avg_nodes = avg_nodes / c
+            avg_time = avg_time / c
 
-            variance_nodes = max(abs(min_nodes - avg_nodes), abs(max_nodes - avg_nodes)) #calculate nodes
-            variance_time = max(abs(min_time - avg_time), abs(max_time - avg_time)) #calculate time
+            variance_nodes = max(abs(min_nodes - avg_nodes), abs(max_nodes - avg_nodes))
+            variance_time = max(abs(min_time - avg_time), abs(max_time - avg_time))
 
-            for index in range(len(result)): #iterates over each element in list
-                if result[index][0] == None: #if index is "none" then puzzle is unsolvable
+            for index in range(len(result)):
+                if result[index][0] == None:
                     print(result[index][1], "unsolvable puzzles found.")
                     print("It took", result[index][2], "seconds to find all solutions.")
                     print("On average it took", avg_nodes, "nodes and", avg_time,
                           "seconds to find one solution, with a variance of", variance_nodes, "nodes and",
                           variance_time,
                           "seconds.")
-                    print("\n") #all prints inform user with information
-                elif result[index][0] == "unsolvable": #first value of index is unsolvable
+                    print("\n")
+                elif result[index][0] == "unsolvable":
                     print(str(index + 1), "unsolvable")
                     print()
-                else: #go to next index if its solvable
+                else:
                     print(str(index + 1), "Solution was found after", result[index][1], "nodes were looked at.")
                     print("Fastest solution took", result[index][0].steps, "moves.")
                     print()
@@ -152,7 +178,7 @@ class Loading():
             choice = input().replace(" ", "")
             if choice == "exit":
                 valid = True
-                heuristic.heuristic_options(results) #if user wants to exit call heuristic options
+                heuristic.heuristic_options(results)
             while not valid:
                 if choice == "exit":
                     heuristic.display_heuristic(heuristic_index, results)
@@ -202,11 +228,12 @@ if __name__ == "__main__":
     # with open("test_data.json", "rb") as file:
     # results = pickle.load(file)
     # print(results)
-    """for i in range(100000):
-        result = puzzleSolver.handle_start("HMaS", 100)
-        path = "result_datt" + str(i) + ".json"
-        with open(path, "wb") as file:
-            pickle.dump(result, file, pickle.HIGHEST_PROTOCOL)"""
+    """result = puzzleSolver.handle_start("M", 100)
+    path = "result_data" + str(4) + ".json"
+    print(path)
+    with open(path, "wb") as file:
+        pickle.dump(result, file, pickle.HIGHEST_PROTOCOL)
+        file.close()"""
     loading = Loading()
     loading.start()
     # loading.loading_bar()
