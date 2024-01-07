@@ -202,7 +202,11 @@ if __name__ == "__main__":
     # with open("test_data.json", "rb") as file:
     # results = pickle.load(file)
     # print(results)
-
+    """for i in range(100000):
+        result = puzzleSolver.handle_start("HMaS", 100)
+        path = "result_datt" + str(i) + ".json"
+        with open(path, "wb") as file:
+            pickle.dump(result, file, pickle.HIGHEST_PROTOCOL)"""
     loading = Loading()
     loading.start()
     # loading.loading_bar()

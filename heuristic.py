@@ -1,4 +1,6 @@
 # calculateDistance
+import time
+
 from BoardWrapper import BoardWrapper
 # import puzzleSolver
 from scipy.spatial.distance import hamming
@@ -20,11 +22,6 @@ def manhattan(board_wrapper, end_board):
     return board_wrapper.steps + dist
 
 
-def manhattan2(board_wrapper, end_board):
-    board = board_wrapper.board
-    return cityblock(board, end_board)
-
-
 def hamming1(board_wrapper, end_board):
     board = board_wrapper.board
     dist = 0
@@ -34,29 +31,12 @@ def hamming1(board_wrapper, end_board):
             should = end_board.index(element)
             if i != should:
                 dist += 1
-    return (board_wrapper.steps + dist) * len(board)
+    return board_wrapper.steps + dist
 
 
 def hamming2(board_wrapper, end_board):
     board = board_wrapper.board
-    return hamming(board, end_board) * len(board)
-
-
-def calculate_distance_simple(board_wrapper, end_board):
-    board = board_wrapper.board
-    dist = 0
-    for i in range(len(board)):
-        dist += abs(end_board[i] - board[i])
-    return dist
-
-
-def calculate_distance_list(board_wrapper, end_board):
-    board = board_wrapper.board
-    dist = 0
-    for i in range(len(board)):
-        element = board[i]
-        dist += abs(end_board.index(element) - i)
-    return dist
+    return board_wrapper.steps + hamming(board, end_board) * len(board)
 
 
 def astar(board_wrapper, end_board):
@@ -70,3 +50,17 @@ def astar(board_wrapper, end_board):
             dist_col = should % 3 - i % 3
             dist += int(abs(dist_col + int(dist_row)))
     return board_wrapper.steps + dist
+
+
+if __name__ == '__main__':
+
+    print(astar(BoardWrapper(tuple([8,6,7,2,5,4,3,0,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
+    print(astar(BoardWrapper(tuple([6,4,7,8,5,0,3,2,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
+    print(manhattan(BoardWrapper(tuple([8,6,7,2,5,4,3,0,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
+    print(manhattan(BoardWrapper(tuple([6,4,7,8,5,0,3,2,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
+    print(hamming1(BoardWrapper(tuple([8,6,7,2,5,4,3,0,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
+    print(hamming1(BoardWrapper(tuple([6,4,7,8,5,0,3,2,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
+    print(hamming2(BoardWrapper(tuple([8,6,7,2,5,4,3,0,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
+    print(hamming2(BoardWrapper(tuple([6,4,7,8,5,0,3,2,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
+    for i in range(182000):
+        print(i)
