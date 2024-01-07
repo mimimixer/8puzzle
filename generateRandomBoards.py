@@ -1,6 +1,4 @@
 import random
-import json
-import heuristic
 from BoardWrapper import BoardWrapper
 # from https://www.tutorialspoint.com/How-to-generate-non-repeating-random-numbers-in-Python on 1.2.24 20:00
 
@@ -9,7 +7,6 @@ def create_random_board():
     random.shuffle(random_board) #numbers set randomly in list
     # traversing the loop 9 times
     board_wrapper = BoardWrapper(tuple(random_board), None, 0, 9999) #set random_board tuple so it cannot be edited
-    board_wrapper.distance = heuristic.manhattan(board_wrapper, (1, 2, 3, 4, 5, 6, 7, 8, 0))
     return board_wrapper
 
 
@@ -17,8 +14,7 @@ def create_random_list(number):
     board_list = [] #how many boards should be created
     for i in range(number):
         new = create_random_board()
-        if new not in board_list:
-            board_list.append(new)
+        board_list.append(new)
     return board_list
 
 

@@ -1,10 +1,4 @@
-# calculateDistance
-import time
-
-#from BoardWrapper import BoardWrapper
-# import puzzleSolver
 from scipy.spatial.distance import hamming
-from scipy.spatial.distance import cityblock
 
 
 # endBoard = puzzleSolver.endBoard
@@ -50,19 +44,3 @@ def astar(board_wrapper, end_board):
             dist_col = should % 3 - i % 3
             dist += int(abs(dist_col + int(dist_row)))
     return board_wrapper.steps + dist * 1.2
-
-
-if __name__ == '__main__':
-    a = [1, 2, 3, 4, 5]
-    a.insert(2,"a")
-    print(a)
-    """print(astar(BoardWrapper(tuple([8,6,7,2,5,4,3,0,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
-    print(astar(BoardWrapper(tuple([6,4,7,8,5,0,3,2,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
-    print(manhattan(BoardWrapper(tuple([8,6,7,2,5,4,3,0,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
-    print(manhattan(BoardWrapper(tuple([6,4,7,8,5,0,3,2,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
-    print(hamming1(BoardWrapper(tuple([8,6,7,2,5,4,3,0,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
-    print(hamming1(BoardWrapper(tuple([6,4,7,8,5,0,3,2,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
-    print(hamming2(BoardWrapper(tuple([8,6,7,2,5,4,3,0,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))
-    print(hamming2(BoardWrapper(tuple([6,4,7,8,5,0,3,2,1]),None, 0,9999), (1, 2, 3, 4, 5, 6, 7, 8, 0)))"""
-    #for i in range(182000):
-    #    print(i)

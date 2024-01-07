@@ -1,9 +1,4 @@
-import math
-from tqdm import tqdm
-from time import sleep
-import pickle
 import puzzleSolver
-import os
 
 
 #ToDo:
@@ -12,51 +7,8 @@ import os
 
 class Loading:
 
-    def loading_bar(self):
-        results = []
-        heuristic = Loading()
-        bar = tqdm(range(0, 100), total=100, desc="Loadig...")
-        for i in bar:
-            if self.display_heuristic(0, results):
-                sleep(.1)
-            elif self.display_heuristic(1, results):
-                sleep(.1)
-            elif self.display_heuristic(2, results):
-                sleep(.1)
-            if i == len(bar) - 1:
-                bar.set_description(desc="Loaded successfully")
-            sleep(.1)
-
-    def old_results(self):
-        ui = Loading()
-        valid = False
-        while not valid:
-            print("1: result_data0")
-            print("2: result_data1")
-            choice = input("Choose what data to look at: ")
-            if choice == "1" or choice == "2":
-                valid = True
-        path = "result_data" + str(int(choice)-1) + ".json"
-        print(path)
-        with open(path, "rb") as file:
-            results = pickle.load(file)
-        ui.heuristic_options(results)
-
-
     def start(self):
-        heuristic = Loading()
         puzzle = puzzleSolver
-        valid = False
-        while not valid:
-            choice = input("Hello, do you want to look at pregenerated results or create new ones? [old new] ")
-            if choice == "old":
-                heuristic.old_results()
-            elif choice == "new":
-                valid = True
-            elif choice == "test":
-                puzzle.handle_start("H&M&aS", -1)
-
-        valid = False
         try:
             num_of_boards = int(
                 input("Hello, how many boards would you like to have solved?[1-1000] ").replace(" ", ""))
@@ -78,13 +30,12 @@ class Loading:
                 valid_before = True
             elif heuristic_value == "specific":
                 valid_before = True
-                print("")
+                print()
                 print("H = Hamming, M = Manhattan, aS = aStar")
                 valid = False
                 input_choice = ["H", "M", "aS", "H&M", "H&aS", "M&aS", "H&M&aS"]
                 while not valid:
                     print("If you want to exit, enter 'exit'.")
-
                     print("Please enter your heuristic [H/M/aS/H&M/H&aS/M&aS/H&M&aS]: ", end="")
                     heuristic_value = input().replace(" ", "")
                     if heuristic_value in input_choice:
@@ -94,12 +45,10 @@ class Loading:
                         valid = True
                     else:
                         print("Input is invalid. Please try again.")
-        else:
-            print("Input is invalid. Please try again.")
 
     def heuristic_options(self, results):
-        heuristic = Loading()
-        print("")
+        ui = Loading()
+        print()
         print("        Choose a heuristic")
         print("    'H'   ", end="")
         print("      'M'    ", end="")
@@ -107,18 +56,17 @@ class Loading:
         print(" [Hamming] ", end="")
         print(" [Manhattan] ", end="")
         print(" [aStar] ")
-        print("")
+        print()
         valid = False
         while not valid:
             print("If you want to exit, enter 'exit'.  If you want to start again enter 'start'.")
-            print("Please enter your heuristic (H or M or aS): ", end="")
-            heuristic_value = input().replace(" ", "")
+            heuristic_value = input("Please enter your heuristic (H or M or aS): ").replace(" ", "")
             if heuristic_value == "H":
-                valid = heuristic.display_heuristic(2, results)
+                valid = ui.display_heuristic(2, results)
             elif heuristic_value == "M":
-                valid = heuristic.display_heuristic(1, results)
+                valid = ui.display_heuristic(1, results)
             elif heuristic_value == "aS":
-                valid = heuristic.display_heuristic(0, results)
+                valid = ui.display_heuristic(0, results)
             elif heuristic_value == "exit":
                 print("Thanks for trying this program!")
                 exit()
@@ -129,12 +77,12 @@ class Loading:
 
     def display_heuristic(self, heuristic_index, results):
         if results[heuristic_index]:
-            heuristic = Loading()
+            ui = Loading()
             result = results[heuristic_index]
             avg_nodes = 0
             avg_time = 0
             max_nodes = 0
-            min_nodes = 190000
+            min_nodes = 19000000
             min_time = 1000000
             max_time = 0
             c = 0
@@ -164,9 +112,6 @@ class Loading:
                           variance_time,
                           "seconds.")
                     print("\n")
-                elif result[index][0] == "unsolvable":
-                    print(str(index + 1), "unsolvable")
-                    print()
                 else:
                     print(str(index + 1), "Solution was found after", result[index][1], "nodes were looked at.")
                     print("Fastest solution took", result[index][0].steps, "moves.")
@@ -175,13 +120,14 @@ class Loading:
 
             print("If you want more information on a specific solve, please enter its number.")
             print("If you want to exit, please enter \"exit\".")
+
             choice = input().replace(" ", "")
             if choice == "exit":
+                ui.heuristic_options(results)
                 valid = True
-                heuristic.heuristic_options(results)
             while not valid:
                 if choice == "exit":
-                    heuristic.display_heuristic(heuristic_index, results)
+                    ui.display_heuristic(heuristic_index, results)
                 elif choice.isdigit():
                     choice = int(choice)
                     if 0 < choice <= len(result):
@@ -201,16 +147,17 @@ class Loading:
                             if c <= 9:
                                 a = " "
                             print("Step", str(c) + ":" + a)
-                            heuristic.pretty_print(i)
+                            ui.pretty_print(i)
                             c += 1
 
                         print("This solution took", result[choice - 1][2], "seconds and", result[choice - 1][1],
                               "nodes to compute.")
-
                 print("If you want more information on a specific solve, please enter its number.")
                 print("If you want to exit, please enter \"exit\".")
                 choice = input().replace(" ", "")
-                heuristic.display_heuristic(heuristic_index, results)
+                if choice == "exit":
+                    valid = True
+                    ui.display_heuristic(heuristic_index, results)
         else:
             print("Please select a different Heuristic as this one wasn't computed.")
             return False
