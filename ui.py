@@ -115,8 +115,8 @@ class Loading:
                 if result[index][0] == None: #if puzzle is unsolvable print following information
                     print(result[index][1], "unsolvable puzzles found.")
                     print("It took", result[index][2], "seconds to find all solutions.")
-                    print("On average it took", "{:.1f}".format(avg_nodes), "nodes and", "{:.3f}".format(avg_time),
-                          "seconds to find one solution, with \na variance of", "{:.1f}".format(variance_nodes), "nodes with a standard deviaton of", "{:.1f}".format(standard_deviation_nodes),
+                    print("On average it took", "{:,.1f}".format(avg_nodes), "nodes and", "{:.3f}".format(avg_time),
+                          "seconds to find one solution, with \na variance of", "{:,.1f}".format(variance_nodes), "nodes with a standard deviaton of", "{:,.1f}".format(standard_deviation_nodes),
                           "nodes, and \na variance of", "{:.3f}".format(variance_time), "seconds and a standard deviation of", "{:.3f}".format(standard_deviation_time), "seconds.")
                     print("\n")
                 else: #if puzzle is solvable print the following information
