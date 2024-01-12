@@ -91,6 +91,7 @@ class Loading:
             avg_time = 0
             variance_nodes = 0
             variance_time = 0
+            fastest_moves = 0
             c = 0
             #set all values
             for res in result:
@@ -114,14 +115,17 @@ class Loading:
             for index in range(len(result)):
                 if result[index][0] == None: #if puzzle is unsolvable print following information
                     print(result[index][1], "unsolvable puzzles found.")
-                    print("It took", result[index][2], "seconds to find all solutions.")
+                    print("It took", "{:,.3f}".format(result[index][2]), "seconds and", "{:,.1f}".format(avg_nodes*c), "steps to find all solutions.")
+                    print("The", c, "solvable puzzles were solved in", "{:,.1f}".format(fastest_moves), "steps, resulting in an average of",
+                          "{:,.1f}".format(fastest_moves/c), "steps per puzzle.")
                     print("On average it took", "{:,.1f}".format(avg_nodes), "nodes and", "{:.3f}".format(avg_time),
                           "seconds to find one solution, with \na variance of", "{:,.1f}".format(variance_nodes), "nodes with a standard deviaton of", "{:,.1f}".format(standard_deviation_nodes),
                           "nodes, and \na variance of", "{:.3f}".format(variance_time), "seconds and a standard deviation of", "{:.3f}".format(standard_deviation_time), "seconds.")
                     print("\n")
                 else: #if puzzle is solvable print the following information
-                    print(str(index + 1), "solutions were found after", result[index][1], "nodes were looked at.")
+                    print(str(index + 1), ": solution was found after", "{:,}".format(result[index][1]), "nodes were looked at.")
                     print("Fastest solution took", result[index][0].steps, "moves.")
+                    fastest_moves += result[index][0].steps
                     print()
             valid = False
 
