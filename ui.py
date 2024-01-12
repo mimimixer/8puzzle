@@ -89,45 +89,43 @@ class Loading:
             result = results[heuristic_index]
             avg_nodes = 0
             avg_time = 0
-            max_nodes = 0
-            min_nodes = 19000000 #has to be greater than 0
-            min_time = 1000000 #has to be greater than 0
-            max_time = 0
+            variance_nodes = 0
+            variance_time = 0
             c = 0
             #set all values
             for res in result:
                 if res[0]: #if there is a heuristic execute if statement
                     c += 1
-                    min_nodes = min(min_nodes, res[1]) #calculate min_nodes
-                    max_nodes = max(max_nodes, res[1]) #calculate max_nodes
-
-                    min_time = min(min_time, res[2]) #calculate min_time
-                    max_time = max(max_time, res[2]) #calculate max_time
-
                     avg_nodes += res[1] #caclulate average nodes
                     avg_time += res[2] #calculate average time
             avg_nodes = avg_nodes / c #average nodes divided by steps
             avg_time = avg_time / c #average time divided by steps
 
-            variance_nodes = max(abs(min_nodes - avg_nodes), abs(max_nodes - avg_nodes)) #calculate difference
-            variance_time = max(abs(min_time - avg_time), abs(max_time - avg_time)) #calculate difference
+            for res in result:
+                if res[0]:  # if there is a heuristic execute if statement
+
+                    variance_nodes += ((res[1] - avg_nodes) ** 2) # caclulate difference nodes to average ^2
+                    variance_time += ((res[2] - avg_time) ** 2)  # calculate difference time to average ^2
+            variance_nodes = variance_nodes / (c - 1)
+            variance_time = variance_time / (c - 1)
+            standard_deviation_nodes = variance_nodes ** 0.5
+            standard_deviation_time = variance_time ** 0.5
 
             for index in range(len(result)):
                 if result[index][0] == None: #if puzzle is unsolvable print following information
                     print(result[index][1], "unsolvable puzzles found.")
                     print("It took", result[index][2], "seconds to find all solutions.")
-                    print("On average it took", avg_nodes, "nodes and", avg_time,
-                          "seconds to find one solution, with a variance of", variance_nodes, "nodes and",
-                          variance_time,
-                          "seconds.")
+                    print("On average it took", "{:.1f}".format(avg_nodes), "nodes and", "{:.3f}".format(avg_time),
+                          "seconds to find one solution, with \na variance of", "{:.1f}".format(variance_nodes), "nodes with a standard deviaton of", "{:.1f}".format(standard_deviation_nodes),
+                          "nodes, and \na variance of", "{:.3f}".format(variance_time), "seconds and a standard deviation of", "{:.3f}".format(standard_deviation_time), "seconds.")
                     print("\n")
                 else: #if puzzle is solvable print the following information
-                    print(str(index + 1), "Solution was found after", result[index][1], "nodes were looked at.")
+                    print(str(index + 1), "solutions were found after", result[index][1], "nodes were looked at.")
                     print("Fastest solution took", result[index][0].steps, "moves.")
                     print()
             valid = False
 
-            print("If you want more information on a specific solve, please enter its number.")
+            print("If you want more information on a specific solution, please enter its number.")
             print("If you want to exit, please enter \"exit\".")
             #user has option to inspect a specific board
             choice = input().replace(" ", "")
@@ -164,7 +162,7 @@ class Loading:
 
                         print("This solution took", result[choice - 1][2], "seconds and", result[choice - 1][1],
                               "nodes to compute.")
-                print("If you want more information on a specific solve, please enter its number.")
+                print("If you want more information on a specific solution, please enter its number.")
                 print("If you want to exit, please enter \"exit\".")
                 choice = input().replace(" ", "")
                 #user gets information and can choose another board or exit
